@@ -126,20 +126,21 @@ def generateGeonameVocabulary(world_path: str, hierarchy_path: str, altnames_pat
     filtered_world = world_frame.sql(
         "select * from self where feature_code in ('PCLI', 'RGN', 'ADM1')"
     )
-    filtered_alt_names = alternate_names.join(filtered_world, 
-                                              on="geonameid",
-                                              how='inner').select(alternate_names.columns).collect()
+    filtered_alt_names = alternate_names.join(
+        filtered_world, on="geonameid",how="full"
+        ).select(alternate_names.collect_schema().names()).collect()
 
     filtered_world = filtered_world.collect()
 
     world = Graph()
 
-    for item in filtered_world.iter_rows():
+    for item in tqdm(filtered_world.iter_rows(),total=filtered_world.height):
         uri = URIRef(GEOSPACES + str(item[0]))
-        pref_name = Literal(item[1])
-        alt_names = []
-        #if item[3]:
-        #   alt_names = item[3].split(",")
+        world.add((
+            uri,
+            SKOS.prefLabel,
+            Literal(Literal(item[1]))
+        ))
         world.add((
             uri,
             RDF.type,
@@ -147,18 +148,10 @@ def generateGeonameVocabulary(world_path: str, hierarchy_path: str, altnames_pat
         ))
         world.add((
             uri,
-            SKOS.prefLabel,
-            pref_name
-        ))
-        world.add((
-            uri,
             GN.countryCode,
             Literal(item[8])
         ))
-        children = hierarchy.sql(
-            f"select * from self where parent = {item[0]}"
-        ).collect()
-        
+        children = hierarchy.sql(f"select * from self where parent = {item[0]}").collect()
         if len(children) > 0:
             for child in children.iter_rows():
                 if not filtered_world.filter(pl.col('geonameid') == child[1]).is_empty():
@@ -167,17 +160,21 @@ def generateGeonameVocabulary(world_path: str, hierarchy_path: str, altnames_pat
                         SKOS.narrower,
                         URIRef(GEOSPACES + str(child[1]))
                     ))
-        specific_alt_names = filtered_alt_names.sql(
-            f"select * from self where geonameid = {item[0]}"
-            )
+        specific_alt_names = filtered_alt_names.sql(f"select * from self where geonameid = {item[0]}")
         if specific_alt_names.height > 0:
             for alt in specific_alt_names.iter_rows():
-                world.add((
-                    uri,
-                    SKOS.altLabel,
-                    Literal(alt[3],lang=alt[2])
-                ))
-
+                if alt[4] == 1:
+                    world.add((
+                        uri,
+                        SKOS.prefLabel,
+                        Literal(alt[3], lang=alt[2])
+                    ))
+                else:
+                    world.add((
+                        uri,
+                        SKOS.altLabel,
+                        Literal(alt[3], lang=alt[2])
+                    ))
 
     infer.skos_hierarchical(world)
     world.serialize(destination='output/geonames-iri.ttl')
