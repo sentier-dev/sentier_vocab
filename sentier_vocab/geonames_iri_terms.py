@@ -124,7 +124,7 @@ def generateGeonameVocabulary(world_path: str, hierarchy_path: str, altnames_pat
     alternate_names = pl.scan_csv(altnames_path, schema=alt_schema, separator="\t")
 
     filtered_world = world_frame.sql(
-        "select * from self where feature_code in ('PCLI', 'RGN', 'ADM1')"
+        "select * from self where feature_code in ('PCLI', 'PCLD', 'RGN', 'ADM1')"
     )
     filtered_alt_names = alternate_names.join(
         filtered_world, on="geonameid",how="full"
