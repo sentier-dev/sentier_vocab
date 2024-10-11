@@ -134,7 +134,7 @@ def generateGeonameVocabulary(world_path: str, hierarchy_path: str, altnames_pat
 
     world = Graph()
 
-    for item in tqdm(filtered_world.iter_rows(),total=filtered_world.height):
+    for item in filtered_world.iter_rows():
         uri = URIRef(GEOSPACES + str(item[0]))
         world.add((
             uri,
