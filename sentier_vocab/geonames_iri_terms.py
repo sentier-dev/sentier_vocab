@@ -1,13 +1,12 @@
-import polars as pl
-from rdflib import URIRef, Graph, Namespace
-from rdflib.namespace import RDF, SKOS
-from rdflib import Literal
-from rdflib.namespace import XSD
-from skosify import infer
-import sentier_data_tools as sdt
 import os
 import zipfile
 from urllib.request import urlretrieve
+
+import polars as pl
+import sentier_data_tools as sdt
+from rdflib import Graph, Literal, Namespace, URIRef
+from rdflib.namespace import RDF, SKOS, XSD
+from skosify import infer
 
 """
 The data for this was found at geonames' site, but it's much too large to put onto git.
@@ -22,6 +21,7 @@ world_path: location of allCountries.txt from allCountries.zip
 hierarchy_path: location of hierarchy.txt from hierarchy.zip
 altnames_path: location of alternateNamesV2.txt from alternateNamesV2.zip 
 """
+
 
 def generateGeonameVocabulary(world_path: str, hierarchy_path: str, altnames_path: str):
     
@@ -62,58 +62,73 @@ def generateGeonameVocabulary(world_path: str, hierarchy_path: str, altnames_pat
     GEOSPACES = "https://sws.geonames.org/"
     GN = Namespace("http://www.geonames.org/ontology#")
 
-    all_schema = pl.Schema({
-        "geonameid":pl.Int64,
-        "name":pl.String,
-        "asciiname":pl.String,
-        "alternatenames":pl.String,
-        "latitude":pl.Float32,
-        "longitude":pl.Float32,
-        "feature_class":pl.String,
-        "feature_code":pl.String,
-        "country_code":pl.String,
-        "cc2":pl.String,
-        "admin1_code":pl.String,
-        "admin2_code":pl.String,
-        "admin3_code":pl.String,
-        "admin4_code":pl.String,
-        "population":pl.Int64,
-        "elevation":pl.Int16,
-        "dem":pl.Int64,
-        "timezone":pl.String,
-        "modification_date":pl.Date
-    })
+    all_schema = pl.Schema(
+        {
+            "geonameid": pl.Int64,
+            "name": pl.String,
+            "asciiname": pl.String,
+            "alternatenames": pl.String,
+            "latitude": pl.Float32,
+            "longitude": pl.Float32,
+            "feature_class": pl.String,
+            "feature_code": pl.String,
+            "country_code": pl.String,
+            "cc2": pl.String,
+            "admin1_code": pl.String,
+            "admin2_code": pl.String,
+            "admin3_code": pl.String,
+            "admin4_code": pl.String,
+            "population": pl.Int64,
+            "elevation": pl.Int16,
+            "dem": pl.Int64,
+            "timezone": pl.String,
+            "modification_date": pl.Date,
+        }
+    )
 
-    world_frame = pl.scan_csv(source=world_path,has_header=False,separator='\t',schema=all_schema)
+    world_frame = pl.scan_csv(
+        source=world_path, separator="\t", schema=all_schema, has_header=False
+    )
 
     ##In the SQL here you can actually expand or narrow what you're going to model.
     ##See more at https://download.geonames.org/export/dump/readme.txt, scroll down to "feature classes"
     ##to isolate only countries, use "where feature_code = 'PCLI'"
     
-    hierarchy_schema = pl.Schema({
-        "parent":pl.Int64,
-        "child":pl.Int64,
-        "admin1_code":pl.String
-    })
+    hierarchy_schema = pl.Schema(
+        {
+            "parent":pl.Int64,
+            "child":pl.Int64,
+            "admin1_code":pl.String
+            
+        }
+    )
 
-    hierarchy = pl.scan_csv(hierarchy_path,schema=hierarchy_schema,separator='\t')
+    hierarchy = pl.scan_csv(
+        hierarchy_path, separator="\t", schema=hierarchy_schema, has_header=False
+    )
 
-    alt_schema = pl.Schema({
-        "alternateNameId":pl.Int32,
-        "geonameid":pl.Int64,
-        "isolanguage":pl.String,
-        "alternate_name":pl.String,
-        "isPreferredName":pl.Int8,
-        "isShortName":pl.Int8,
-        "isColloquial":pl.Int8,
-        "isHistoric":pl.Int8,
-        "from":pl.String,
-        "to":pl.String
-    })
-    alternate_names = pl.scan_csv(r"C:/Users/misc/Downloads/alternateNamesV2/alternateNamesV2.txt",schema=alt_schema,separator="\t")
+    alt_schema = pl.Schema(
+        {
+            "alternateNameId":pl.Int32,
+            "geonameid":pl.Int64,
+            "isolanguage":pl.String,
+            "alternate_name":pl.String,
+            "isPreferredName":pl.Int8,
+            "isShortName":pl.Int8,
+            "isColloquial":pl.Int8,
+            "isHistoric":pl.Int8,
+            "from":pl.String,
+            "to":pl.String
+        }
+    )
+    alternate_names = pl.scan_csv(altnames_path, schema=alt_schema, separator="\t")
 
-    filtered_world = world_frame.sql("select * from self where feature_code in ('PCLI', 'RGN', 'ADM1')")
-    filtered_alt_names = alternate_names.join(filtered_world, on="geonameid",how='inner').select(alternate_names.columns).collect()
+    filtered_world = world_frame.sql(
+        "select * from self where feature_code in ('PCLI', 'RGN', 'ADM1')"
+    )
+    filtered_alt_names = alternate_names.join(filtered_world, 
+                                              on="geonameid",
+                                              how='inner').select(alternate_names.columns).collect()
 
     filtered_world = filtered_world.collect()
 
@@ -140,7 +155,10 @@ def generateGeonameVocabulary(world_path: str, hierarchy_path: str, altnames_pat
             GN.countryCode,
             Literal(item[8])
         ))
-        children = hierarchy.sql(f"select * from self where parent = {item[0]}").collect()
+        children = hierarchy.sql(
+            f"select * from self where parent = {item[0]}"
+        ).collect()
+        
         if len(children) > 0:
             for child in children.iter_rows():
                 if not filtered_world.filter(pl.col('geonameid') == child[1]).is_empty():
@@ -149,7 +167,9 @@ def generateGeonameVocabulary(world_path: str, hierarchy_path: str, altnames_pat
                         SKOS.narrower,
                         URIRef(GEOSPACES + str(child[1]))
                     ))
-        specific_alt_names = filtered_alt_names.sql(f"select * from self where geonameid = {item[0]}")
+        specific_alt_names = filtered_alt_names.sql(
+            f"select * from self where geonameid = {item[0]}"
+            )
         if specific_alt_names.height > 0:
             for alt in specific_alt_names.iter_rows():
                 world.add((
