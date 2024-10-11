@@ -15,11 +15,15 @@ For the data used to generate the dataframe for the entire world, look here:
 384MB, unpacks to 1.6 GB https://download.geonames.org/export/dump/allCountries.zip
 For the hierarchy dataframe, look here:
 2MB, unpacks to 9MB https://download.geonames.org/export/dump/hierarchy.zip
-
-set the world_path to where you stored allCountries.txt, and hierarchy_path to wherever hierarchy.txt is.
+For the altnernate names data, look here:
+187MB, unpacks to 719MB https://download.geonames.org/export/dump/alternateNamesV2.zip
+params:
+world_path: location of allCountries.txt from allCountries.zip
+hierarchy_path: location of hierarchy.txt from hierarchy.zip
+altnames_path: location of alternateNamesV2.txt from alternateNamesV2.zip 
 """
 
-def generateGeonameVocabulary(world_path: str, hierarchy_path: str):
+def generateGeonameVocabulary(world_path: str, hierarchy_path: str, altnames_path: str):
     
     # ##  THIS PART FETCHES AND EXTRACTS.
     # temp_dir = os.path.join(os.curdir,"temp")
@@ -34,14 +38,23 @@ def generateGeonameVocabulary(world_path: str, hierarchy_path: str):
     # world_path = os.path.realpath(os.path.join(temp_dir,"allCountries.txt"))
     # world_url = "https://download.geonames.org/export/dump/allCountries.zip"
 
+    # altnames_zip = os.path.realpath(os.path.join(temp_dir,"alternateNamesv2.zip"))
+    # altnames_path = os.path.realpath(os.path.join(temp_dir,"alternateNamesV2.txt"))
+    # altnames_url = "https://download.geonames.org/export/dump/alternateNamesV2.zip"
+    
     # urlretrieve(hierarchy_url,hier_zip)
 
     # urlretrieve(world_url,world_zip)
+    
+    # urlretrieve(altnames_url,altnames_zip)
 
     # with zipfile.ZipFile(hier_zip, 'r') as zip_ref:
     #     zip_ref.extractall(temp_dir)
     
     # with zipfile.ZipFile(world_zip, 'r') as zip_reff:
+    #     zip_reff.extractall(temp_dir)
+    
+    # with zipfile.ZipFile(altnames_zip, 'r') as zip_reff:
     #     zip_reff.extractall(temp_dir)
 
     # ##FETCHING AND EXTRACTING COMPLETED
@@ -85,7 +98,24 @@ def generateGeonameVocabulary(world_path: str, hierarchy_path: str):
 
     hierarchy = pl.scan_csv(hierarchy_path,schema=hierarchy_schema,separator='\t')
 
-    filtered_world = world_frame.sql("select * from self where feature_code in ('PCLI', 'ADM1', 'RGN')").collect()
+    alt_schema = pl.Schema({
+        "alternateNameId":pl.Int32,
+        "geonameid":pl.Int64,
+        "isolanguage":pl.String,
+        "alternate_name":pl.String,
+        "isPreferredName":pl.Int8,
+        "isShortName":pl.Int8,
+        "isColloquial":pl.Int8,
+        "isHistoric":pl.Int8,
+        "from":pl.String,
+        "to":pl.String
+    })
+    alternate_names = pl.scan_csv(r"C:/Users/misc/Downloads/alternateNamesV2/alternateNamesV2.txt",schema=alt_schema,separator="\t")
+
+    filtered_world = world_frame.sql("select * from self where feature_code in ('PCLI', 'RGN', 'ADM1')")
+    filtered_alt_names = alternate_names.join(filtered_world, on="geonameid",how='inner').select(alternate_names.columns).collect()
+
+    filtered_world = filtered_world.collect()
 
     world = Graph()
 
@@ -119,6 +149,14 @@ def generateGeonameVocabulary(world_path: str, hierarchy_path: str):
                         SKOS.narrower,
                         URIRef(GEOSPACES + str(child[1]))
                     ))
+        specific_alt_names = filtered_alt_names.sql(f"select * from self where geonameid = {item[0]}")
+        if specific_alt_names.height > 0:
+            for alt in specific_alt_names.iter_rows():
+                world.add((
+                    uri,
+                    SKOS.altLabel,
+                    Literal(alt[3],lang=alt[2])
+                ))
 
 
     infer.skos_hierarchical(world)
