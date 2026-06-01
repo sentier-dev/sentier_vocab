@@ -113,6 +113,17 @@ def _mint_child_iri(parent, slot, item, sv: SchemaView) -> URIRef:
     return URIRef(f"{str(parent).rstrip('/')}/{slot.name}/{slug}")
 
 
+def member_slot_and_class(sv: SchemaView) -> tuple:
+    """Return (collection_list_slot_name, member_class_name) for the schema's tree_root."""
+    for name, cls in sv.all_classes().items():
+        if cls.tree_root:
+            for sn in sv.class_slots(name):
+                s = sv.induced_slot(sn, name)
+                if s.multivalued and s.range in sv.all_classes():
+                    return sn, s.range
+    raise SchemaValidationError("no member list slot found in tree_root collection")
+
+
 def concept_to_triples(record: dict, class_name: str, sv: SchemaView, scheme: str) -> list:
     """Top-level: rdf:type + skos:inScheme + all slot triples for one record."""
     subject = URIRef(record["iri"])

@@ -15,7 +15,12 @@ def test_build_graph_produces_expected_triples():
             "exact_match": ["http://example.org/X1"],
         }
     ]
-    result = build_graph(concepts, "https://vocab.sentier.dev/flows/")
+    result = build_graph(
+        concepts,
+        "https://vocab.sentier.dev/flows/",
+        paths.SCHEMAS_DIR / "elementary-flow.yaml",
+        "ElementaryFlow",
+    )
 
     expected = Graph()
     scheme = URIRef("https://vocab.sentier.dev/flows/")
@@ -39,7 +44,12 @@ def test_build_graph_handles_broader_and_alt_labels():
             "broader": "https://vocab.sentier.dev/flows/X1",
         }
     ]
-    result = build_graph(concepts, "https://vocab.sentier.dev/flows/")
+    result = build_graph(
+        concepts,
+        "https://vocab.sentier.dev/flows/",
+        paths.SCHEMAS_DIR / "elementary-flow.yaml",
+        "ElementaryFlow",
+    )
     x2 = URIRef("https://vocab.sentier.dev/flows/X2")
     assert (x2, SKOS.altLabel, Literal("Baz", lang="en")) in result
     assert (x2, SKOS.broader, URIRef("https://vocab.sentier.dev/flows/X1")) in result
@@ -55,7 +65,12 @@ def test_build_graph_handles_notation_close_match_related():
             "related": ["http://example.org/rel"],
         }
     ]
-    result = build_graph(concepts, "https://vocab.sentier.dev/flows/")
+    result = build_graph(
+        concepts,
+        "https://vocab.sentier.dev/flows/",
+        paths.SCHEMAS_DIR / "elementary-flow.yaml",
+        "ElementaryFlow",
+    )
     x3 = URIRef("https://vocab.sentier.dev/flows/X3")
     # notation is a plain literal (NOT language-tagged)
     assert (x3, SKOS.notation, Literal("Q3")) in result
