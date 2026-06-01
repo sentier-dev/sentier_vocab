@@ -116,3 +116,22 @@ def test_generate_category_writes_valid_ttl(tmp_path):
     freshwater = URIRef("https://vocab.sentier.dev/flows/ENVO_00002006")
     assert (freshwater, RDF.type, SKOS.Concept) in reparsed
     assert (freshwater, SKOS.prefLabel, Literal("Freshwater", lang="en")) in reparsed
+
+
+def test_process_exchanges_generate(tmp_path):
+    from rdflib import Graph, URIRef
+
+    from sentier_vocab.generate import generate_category
+
+    out = generate_category(
+        category="processes",
+        schema_path=paths.SCHEMAS_DIR / "process.yaml",
+        data_path=paths.DATA_DIR / "processes" / "core.yaml",
+        output_path=tmp_path / "processes.ttl",
+    )
+    g = Graph().parse(out, format="turtle")
+    ONT = "https://vocab.sentier.dev/ontology/"
+    assert any(p == URIRef(ONT + "hasExchange") for _, p, _ in g)
+    assert any(p == URIRef(ONT + "amount") for _, p, _ in g)
+    # the minted exchange child node is addressable under the process IRI
+    assert any("/exchanges/" in str(s) for s, _, _ in g)
