@@ -22,7 +22,7 @@ def schema_view(schema_path: str) -> SchemaView:
     return SchemaView(schema_path)
 
 
-def _ann(element, key):
+def _ann(element, key: str) -> object | None:
     anns = getattr(element, "annotations", None) or {}
     if key in anns:
         a = anns[key]
@@ -30,7 +30,7 @@ def _ann(element, key):
     return None
 
 
-def _expand(sv: SchemaView, curie: str) -> str:
+def _expand(sv: SchemaView, curie: str | None) -> str | None:
     if curie is None:
         return None
     if "://" in curie:
@@ -38,7 +38,7 @@ def _expand(sv: SchemaView, curie: str) -> str:
     return str(sv.namespaces().uri_for(curie))
 
 
-def _literal_for(value, slot, rng):
+def _literal_for(value, slot, rng: str) -> Literal:
     if rng in _NUMERIC:
         return Literal(value)  # rdflib infers xsd type from the Python value
     if rng == "boolean":
@@ -50,7 +50,7 @@ def _literal_for(value, slot, rng):
     return Literal(str(value))
 
 
-def _object_triples(record, class_name, sv, subject):
+def _object_triples(record: dict, class_name: str, sv: SchemaView, subject) -> list:
     """rdf:type + slot triples for a node (no inScheme). Used for top-level and inlined nodes."""
     triples = []
     cls = sv.get_class(class_name)
@@ -76,7 +76,7 @@ def _object_triples(record, class_name, sv, subject):
     return triples
 
 
-def _slot_value_triples(subject, pred, item, slot, sv):
+def _slot_value_triples(subject, pred, item, slot, sv: SchemaView) -> list:
     rng = slot.range
     if rng in sv.all_classes() and (slot.inlined or slot.inlined_as_list):
         child = _mint_child_iri(subject, slot, item, sv)
@@ -88,13 +88,15 @@ def _slot_value_triples(subject, pred, item, slot, sv):
     return [(subject, pred, _literal_for(item, slot, rng))]
 
 
-def _mint_child_iri(parent, slot, item, sv):
+def _mint_child_iri(parent, slot, item, sv: SchemaView) -> URIRef:
     """Deterministic IRI for an inlined child node.
 
     Uses the slot's ``iri_key`` annotation (a sub-slot whose value's trailing id
     names the child) and optional ``iri_suffix`` annotation (a sub-slot appended
     for disambiguation). Falls back to the slot name only if no key is given.
     """
+    # Deferred import: iris imports nothing from this module, but keep it local
+    # to avoid any import-order coupling.
     from sentier_vocab.iris import identifier_from
 
     key_slot = _ann(slot, "iri_key")
@@ -104,11 +106,14 @@ def _mint_child_iri(parent, slot, item, sv):
         if suffix_slot and item.get(suffix_slot) is not None:
             slug = f"{slug}-{item[suffix_slot]}"
     else:
+        # NOTE: only safe for single-item inlined slots; a multivalued inlined
+        # slot without iri_key would collide. All current uses (process
+        # exchanges) set iri_key.
         slug = "node"
     return URIRef(f"{str(parent).rstrip('/')}/{slot.name}/{slug}")
 
 
-def concept_to_triples(record, class_name, sv, scheme):
+def concept_to_triples(record: dict, class_name: str, sv: SchemaView, scheme: str) -> list:
     """Top-level: rdf:type + skos:inScheme + all slot triples for one record."""
     subject = URIRef(record["iri"])
     triples = _object_triples(record, class_name, sv, subject)

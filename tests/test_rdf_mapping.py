@@ -67,3 +67,21 @@ def test_missing_slot_uri_raises(tmp_path):
             schema_view(str(bad)),
             SCHEME,
         )
+
+
+def test_expand_passes_through_full_uri_slot_uri(tmp_path):
+    schema = tmp_path / "fulluri.yaml"
+    schema.write_text(
+        "id: https://vocab.sentier.dev/schemas/_fulluri\n"
+        "name: fulluri\n"
+        "prefixes: {linkml: 'https://w3id.org/linkml/', sentier: 'https://vocab.sentier.dev/'}\n"
+        "default_prefix: sentier\ndefault_range: string\nimports: [linkml:types]\n"
+        "classes:\n  T:\n    tree_root: true\n    attributes:\n"
+        "      iri: {identifier: true, range: uriorcurie}\n"
+        "      note: {slot_uri: 'http://www.w3.org/2004/02/skos/core#note'}\n"
+    )
+    s = URIRef("https://vocab.sentier.dev/flows/Z")
+    t = set(
+        concept_to_triples({"iri": str(s), "note": "hi"}, "T", schema_view(str(schema)), SCHEME)
+    )
+    assert (s, URIRef("http://www.w3.org/2004/02/skos/core#note"), Literal("hi")) in t
