@@ -46,3 +46,18 @@ def test_schema_id_is_stable_uri_and_standalone(schema, category, data, collecti
     for imp in parsed.get("imports", []):
         assert imp in ("linkml:types", "common")
     assert "app/" not in text and str(paths.REPO_ROOT) not in text
+
+
+def test_characterization_factor_iris_follow_convention():
+    import yaml as _yaml
+
+    from sentier_vocab.iris import identifier_from, iri_for_cf
+
+    data = _yaml.safe_load((paths.DATA_DIR / "characterization-factors" / "core.yaml").read_text())
+    for cf in data["characterization_factors"]:
+        expected = iri_for_cf(
+            identifier_from(cf["method"]),
+            identifier_from(cf["impact_category"]),
+            identifier_from(cf["flow"]),
+        )
+        assert cf["iri"] == str(expected), f"CF iri {cf['iri']} != convention {expected}"

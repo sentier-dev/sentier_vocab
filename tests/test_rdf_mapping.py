@@ -128,3 +128,27 @@ def test_member_slot_and_class_raises_without_member(tmp_path):
     )
     with pytest.raises(SchemaValidationError):
         member_slot_and_class(schema_view(str(schema)))
+
+
+def test_same_flow_both_directions_mints_distinct_children():
+    p = URIRef("https://vocab.sentier.dev/processes/mill")
+    flow = "https://vocab.sentier.dev/flows/ENVO_water"
+    t = set(
+        concept_to_triples(
+            {
+                "iri": str(p),
+                "exchanges": [
+                    {"flow": flow, "direction": "input", "amount": 1.0},
+                    {"flow": flow, "direction": "output", "amount": 0.4},
+                ],
+            },
+            "Parent",
+            schema_view(NESTED),
+            "https://vocab.sentier.dev/processes/",
+        )
+    )
+    child_in = URIRef("https://vocab.sentier.dev/processes/mill/exchanges/ENVO_water-input")
+    child_out = URIRef("https://vocab.sentier.dev/processes/mill/exchanges/ENVO_water-output")
+    assert (p, URIRef(ONT + "hasExchange"), child_in) in t
+    assert (p, URIRef(ONT + "hasExchange"), child_out) in t
+    assert child_in != child_out
