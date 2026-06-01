@@ -44,6 +44,14 @@ CATALOG: list[DataType] = [
         "QUDT units imported; no group model yet (transitional)",
     ),
     DataType(
+        "Unit groups",
+        iris.NAMESPACES["unit-groups"],
+        "❌ missing",
+        "native",
+        "unit-groups",
+        "New schema + data (Phase 4)",
+    ),
+    DataType(
         "Products",
         iris.NAMESPACES["products"],
         "🟡 partial",
