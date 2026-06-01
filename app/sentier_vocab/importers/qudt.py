@@ -139,7 +139,9 @@ class QUDT:
     def check_that_deprecated_have_replaced_by(self, graph: Graph, kind: str) -> bool:
         # Note that it doesn't work the other way...
         replaced = {
-            s for s, p, o in graph.triples((None, DCTERMS.isReplacedBy, None)) if s.startswith(kind)
+            s
+            for s, p, o in graph.triples((None, DCTERMS.isReplacedBy, None))
+            if s.startswith(kind)
         }
         deprecated = {
             s for s, p, o in graph.triples((None, QUDTS.deprecated, None)) if s.startswith(kind)
@@ -208,7 +210,9 @@ class QUDT:
         return qk_mapping
 
     def check_all_units_have_vector(self, graph: Graph) -> None:
-        all_units = {s for s, p, o in graph.triples((None, None, None)) if s.startswith(QUDTV.unit)}
+        all_units = {
+            s for s, p, o in graph.triples((None, None, None)) if s.startswith(QUDTV.unit)
+        }
         with_dimension_vector = {
             s
             for s, p, o in graph.triples((None, QUDTS.hasDimensionVector, None))

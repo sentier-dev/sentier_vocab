@@ -48,7 +48,11 @@ CUSTOM_PRODUCTS_DATA = [
         "A solid oxide fuel cell that runs in regenerative mode to achieve the electrolysis of water.",
         "en",
     ),
-    ("soel-electrolyzer", "related", "https://en.wikipedia.org/wiki/Solid_oxide_electrolyzer_cell"),
+    (
+        "soel-electrolyzer",
+        "related",
+        "https://en.wikipedia.org/wiki/Solid_oxide_electrolyzer_cell",
+    ),
     # Missing from Combined Nomenclature
     # tetraflouroethylene, not poly-
     ("tetrafluoroethylene", "type", "Concept"),
