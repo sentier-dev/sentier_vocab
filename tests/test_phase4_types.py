@@ -3,6 +3,7 @@ import yaml
 from linkml_runtime import SchemaView
 
 from sentier_vocab import paths
+from sentier_vocab.iris import identifier_from, iri_for_cf
 from sentier_vocab.schemas import validate_data_file
 
 # (schema filename, data category, data filename, expected member-collection class)
@@ -49,11 +50,7 @@ def test_schema_id_is_stable_uri_and_standalone(schema, category, data, collecti
 
 
 def test_characterization_factor_iris_follow_convention():
-    import yaml as _yaml
-
-    from sentier_vocab.iris import identifier_from, iri_for_cf
-
-    data = _yaml.safe_load((paths.DATA_DIR / "characterization-factors" / "core.yaml").read_text())
+    data = yaml.safe_load((paths.DATA_DIR / "characterization-factors" / "core.yaml").read_text())
     for cf in data["characterization_factors"]:
         expected = iri_for_cf(
             identifier_from(cf["method"]),

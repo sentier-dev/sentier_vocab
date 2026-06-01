@@ -12,6 +12,7 @@ from rdflib import Literal, URIRef
 from rdflib.namespace import RDF, SKOS, XSD
 
 from sentier_vocab.errors import SchemaValidationError
+from sentier_vocab.iris import identifier_from
 
 _NUMERIC = {"float", "double", "decimal", "integer"}
 
@@ -95,10 +96,6 @@ def _mint_child_iri(parent, slot, item, sv: SchemaView) -> URIRef:
     names the child) and optional ``iri_suffix`` annotation (a sub-slot appended
     for disambiguation). Falls back to the slot name only if no key is given.
     """
-    # Deferred import: iris imports nothing from this module, but keep it local
-    # to avoid any import-order coupling.
-    from sentier_vocab.iris import identifier_from
-
     key_slot = _ann(slot, "iri_key")
     suffix_slot = _ann(slot, "iri_suffix")
     if key_slot and item.get(key_slot) is not None:

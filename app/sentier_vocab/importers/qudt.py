@@ -147,7 +147,9 @@ class QUDT:
         return deprecated.difference(replaced)
 
     def add_quantity_kinds(self, cs: URIRef) -> dict[URIRef, URIRef]:
-        qk_graph = self.get_graph_for_file("/src/main/rdf/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL")
+        qk_graph = self.get_graph_for_file(
+            "/src/main/rdf/vocab/quantitykinds/VOCAB_QUDT-QUANTITY-KINDS-ALL"
+        )
         assert not self.check_that_deprecated_have_replaced_by(qk_graph, QK)
 
         qk_mapping = {

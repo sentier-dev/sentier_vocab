@@ -63,7 +63,7 @@ testing = [
 dev = [
     "black",
     "build",
-    "flake8",
+    "ruff",
     "pre-commit",
     "pylint",
     "pytest",
@@ -90,6 +90,19 @@ norecursedirs = [
     ".tox"
 ]
 testpaths = ["tests/*.py"]
+
+[tool.ruff]
+line-length = 100
+extend-exclude = ["schemas/_generated", "docs/conf.py", "dev"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "PLC0415"]
+ignore = ["E203"]
+
+[tool.ruff.lint.per-file-ignores]
+# Transitional importer modules hold long literal data (ISO definitions, URLs,
+# product/description strings) that cannot be meaningfully wrapped.
+"app/sentier_vocab/importers/**" = ["E501"]
 
 [tool.flake8]
 # Some sane defaults for the code style checker flake8

@@ -8,7 +8,9 @@ from pathlib import Path
 
 import yaml
 from linkml_runtime import SchemaView
-from rdflib import Graph, URIRef
+from rdflib import Graph
+from rdflib import Namespace as RDFNamespace
+from rdflib import URIRef
 from rdflib.namespace import RDF, SKOS
 
 from sentier_vocab.errors import SchemaValidationError
@@ -20,8 +22,6 @@ from sentier_vocab.schemas import validate_data_file
 
 def build_graph(concepts: list[dict], scheme_uri: str, sv: SchemaView, class_name: str) -> Graph:
     """Build an rdflib SKOS graph from a list of concept dicts using the schema engine."""
-    from rdflib import Namespace as RDFNamespace
-
     graph = Graph()
     graph.bind("skos", SKOS)
     # Bind all schema-declared prefixes so rdflib never auto-assigns ns1/ns2,

@@ -1,8 +1,10 @@
+import pytest
 from rdflib import Graph, Literal, URIRef
 from rdflib.compare import isomorphic
 from rdflib.namespace import RDF, SKOS
 
 from sentier_vocab import paths
+from sentier_vocab.errors import SchemaValidationError
 from sentier_vocab.generate import build_graph, generate_category
 from sentier_vocab.rdf_mapping import schema_view
 
@@ -80,10 +82,6 @@ def test_build_graph_handles_notation_close_match_related():
 
 
 def test_generate_category_rejects_unregistered_scheme(tmp_path):
-    import pytest
-
-    from sentier_vocab.errors import SchemaValidationError
-
     bad = tmp_path / "bad.yaml"
     bad.write_text(
         "scheme: https://vocab.sentier.dev/NOT-A-REAL-NS/\n"
@@ -119,10 +117,6 @@ def test_generate_category_writes_valid_ttl(tmp_path):
 
 
 def test_process_exchanges_generate(tmp_path):
-    from rdflib import Graph, URIRef
-
-    from sentier_vocab.generate import generate_category
-
     out = generate_category(
         category="processes",
         schema_path=paths.SCHEMAS_DIR / "process.yaml",
