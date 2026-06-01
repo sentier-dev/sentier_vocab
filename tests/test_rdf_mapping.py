@@ -85,3 +85,27 @@ def test_expand_passes_through_full_uri_slot_uri(tmp_path):
         concept_to_triples({"iri": str(s), "note": "hi"}, "T", schema_view(str(schema)), SCHEME)
     )
     assert (s, URIRef("http://www.w3.org/2004/02/skos/core#note"), Literal("hi")) in t
+
+
+NESTED = str(paths.REPO_ROOT / "tests" / "fixtures" / "engine" / "nested.yaml")
+
+
+def test_inlined_objects_mint_child_iris_and_link():
+    p = URIRef("https://vocab.sentier.dev/processes/steel")
+    flow = "https://vocab.sentier.dev/flows/ENVO_iron"
+    t = set(
+        concept_to_triples(
+            {
+                "iri": str(p),
+                "exchanges": [{"flow": flow, "direction": "input", "amount": 2.3}],
+            },
+            "Parent",
+            schema_view(NESTED),
+            "https://vocab.sentier.dev/processes/",
+        )
+    )
+    child = URIRef("https://vocab.sentier.dev/processes/steel/exchanges/ENVO_iron-input")
+    assert (p, URIRef(ONT + "hasExchange"), child) in t
+    assert (child, RDF.type, URIRef(ONT + "Exchange")) in t
+    assert (child, URIRef(ONT + "flow"), URIRef(flow)) in t
+    assert (child, URIRef(ONT + "amount"), Literal(2.3)) in t
