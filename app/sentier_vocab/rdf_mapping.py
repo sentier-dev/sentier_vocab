@@ -113,7 +113,7 @@ def _mint_child_iri(parent, slot, item, sv: SchemaView) -> URIRef:
     return URIRef(f"{str(parent).rstrip('/')}/{slot.name}/{slug}")
 
 
-def member_slot_and_class(sv: SchemaView) -> tuple:
+def member_slot_and_class(sv: SchemaView) -> tuple[str, str]:
     """Return (collection_list_slot_name, member_class_name) for the schema's tree_root."""
     for name, cls in sv.all_classes().items():
         if cls.tree_root:

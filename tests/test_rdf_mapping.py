@@ -4,7 +4,7 @@ from rdflib.namespace import RDF, SKOS
 
 from sentier_vocab import paths
 from sentier_vocab.errors import SchemaValidationError
-from sentier_vocab.rdf_mapping import concept_to_triples, schema_view
+from sentier_vocab.rdf_mapping import concept_to_triples, member_slot_and_class, schema_view
 
 FLAT = str(paths.REPO_ROOT / "tests" / "fixtures" / "engine" / "flat.yaml")
 SCHEME = "https://vocab.sentier.dev/flows/"
@@ -109,3 +109,22 @@ def test_inlined_objects_mint_child_iris_and_link():
     assert (child, RDF.type, URIRef(ONT + "Exchange")) in t
     assert (child, URIRef(ONT + "flow"), URIRef(flow)) in t
     assert (child, URIRef(ONT + "amount"), Literal(2.3)) in t
+
+
+def test_member_slot_and_class_resolves_tree_root_member():
+    assert member_slot_and_class(schema_view(NESTED)) == ("exchanges", "Exchange")
+
+
+def test_member_slot_and_class_raises_without_member(tmp_path):
+    schema = tmp_path / "nocoll.yaml"
+    schema.write_text(
+        "id: https://vocab.sentier.dev/schemas/_nocoll\n"
+        "name: nocoll\n"
+        "prefixes: {linkml: 'https://w3id.org/linkml/', sentier: 'https://vocab.sentier.dev/'}\n"
+        "default_prefix: sentier\ndefault_range: string\nimports: [linkml:types]\n"
+        "classes:\n  Solo:\n    tree_root: true\n    attributes:\n"
+        "      iri: {identifier: true, range: uriorcurie}\n"
+        "      label: {slot_uri: 'http://www.w3.org/2004/02/skos/core#prefLabel'}\n"
+    )
+    with pytest.raises(SchemaValidationError):
+        member_slot_and_class(schema_view(str(schema)))

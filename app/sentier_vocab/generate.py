@@ -7,6 +7,7 @@ independent and emit their own TTL separately.
 from pathlib import Path
 
 import yaml
+from linkml_runtime import SchemaView
 from rdflib import Graph, URIRef
 from rdflib.namespace import RDF, SKOS
 
@@ -17,11 +18,8 @@ from sentier_vocab.rdf_mapping import concept_to_triples, member_slot_and_class,
 from sentier_vocab.schemas import validate_data_file
 
 
-def build_graph(
-    concepts: list[dict], scheme_uri: str, schema_path: Path | str, class_name: str
-) -> Graph:
+def build_graph(concepts: list[dict], scheme_uri: str, sv: SchemaView, class_name: str) -> Graph:
     """Build an rdflib SKOS graph from a list of concept dicts using the schema engine."""
-    sv = schema_view(str(schema_path))
     graph = Graph()
     graph.bind("skos", SKOS)
     graph.add((URIRef(scheme_uri), RDF.type, SKOS.ConceptScheme))
@@ -59,5 +57,5 @@ def generate_category(
     sv = schema_view(str(schema_path))
     collection_key, class_name = member_slot_and_class(sv)
     concepts = raw.get(collection_key) or []
-    graph = build_graph(concepts, scheme, schema_path, class_name)
+    graph = build_graph(concepts, scheme, sv, class_name)
     return write_ttl(graph, output_path)

@@ -4,6 +4,7 @@ from rdflib.namespace import RDF, SKOS
 
 from sentier_vocab import paths
 from sentier_vocab.generate import build_graph, generate_category
+from sentier_vocab.rdf_mapping import schema_view
 
 
 def test_build_graph_produces_expected_triples():
@@ -18,7 +19,7 @@ def test_build_graph_produces_expected_triples():
     result = build_graph(
         concepts,
         "https://vocab.sentier.dev/flows/",
-        paths.SCHEMAS_DIR / "elementary-flow.yaml",
+        schema_view(str(paths.SCHEMAS_DIR / "elementary-flow.yaml")),
         "ElementaryFlow",
     )
 
@@ -47,7 +48,7 @@ def test_build_graph_handles_broader_and_alt_labels():
     result = build_graph(
         concepts,
         "https://vocab.sentier.dev/flows/",
-        paths.SCHEMAS_DIR / "elementary-flow.yaml",
+        schema_view(str(paths.SCHEMAS_DIR / "elementary-flow.yaml")),
         "ElementaryFlow",
     )
     x2 = URIRef("https://vocab.sentier.dev/flows/X2")
@@ -68,7 +69,7 @@ def test_build_graph_handles_notation_close_match_related():
     result = build_graph(
         concepts,
         "https://vocab.sentier.dev/flows/",
-        paths.SCHEMAS_DIR / "elementary-flow.yaml",
+        schema_view(str(paths.SCHEMAS_DIR / "elementary-flow.yaml")),
         "ElementaryFlow",
     )
     x3 = URIRef("https://vocab.sentier.dev/flows/X3")

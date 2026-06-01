@@ -39,6 +39,8 @@ classes:
         description: The ConceptScheme IRI these flows belong to.
         range: uriorcurie
         required: true
+        annotations:
+          internal: true
       flows:
         description: The elementary flows in this group.
         range: ElementaryFlow
