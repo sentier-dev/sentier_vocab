@@ -1,0 +1,11 @@
+@prefix ns1: <http://qudt.org/schema/qudt/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+<https://vocab.sentier.dev/model-terms/efficiency> a skos:Concept ;
+    ns1:hasQuantityKind <http://qudt.org/vocab/quantitykind/DimensionlessRatio> ;
+    skos:definition "Ratio of useful output to input."@en ;
+    skos:inScheme <https://vocab.sentier.dev/model-terms/> ;
+    skos:prefLabel "Efficiency"@en .
+
+<https://vocab.sentier.dev/model-terms/> a skos:ConceptScheme .
+

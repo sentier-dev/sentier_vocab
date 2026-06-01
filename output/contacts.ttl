@@ -1,0 +1,12 @@
+@prefix ns1: <https://vocab.sentier.dev/ontology/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+<https://vocab.sentier.dev/contacts/sentier-dev> a skos:Concept ;
+    skos:inScheme <https://vocab.sentier.dev/contacts/> ;
+    skos:prefLabel "Sentier.dev"@en ;
+    ns1:email "info@sentier.dev" ;
+    ns1:organisation "Sentier.dev"@en ;
+    ns1:url <https://sentier.dev> .
+
+<https://vocab.sentier.dev/contacts/> a skos:ConceptScheme .
+
