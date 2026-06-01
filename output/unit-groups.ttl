@@ -1,13 +1,13 @@
-@prefix ns1: <https://vocab.sentier.dev/ontology/> .
-@prefix ns2: <http://qudt.org/schema/qudt/> .
+@prefix ont: <https://vocab.sentier.dev/ontology/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
 <https://vocab.sentier.dev/units/group/mass> a skos:Concept ;
-    ns2:hasQuantityKind <http://qudt.org/vocab/quantitykind/Mass> ;
-    ns2:hasUnit <http://qudt.org/vocab/unit/KiloGM> ;
+    qudt:hasQuantityKind <http://qudt.org/vocab/quantitykind/Mass> ;
+    qudt:hasUnit <http://qudt.org/vocab/unit/KiloGM> ;
     skos:inScheme <https://vocab.sentier.dev/units/group/> ;
     skos:prefLabel "Units of mass"@en ;
-    ns1:hasUnit <http://qudt.org/vocab/unit/GM>,
+    ont:hasUnit <http://qudt.org/vocab/unit/GM>,
         <http://qudt.org/vocab/unit/KiloGM> .
 
 <https://vocab.sentier.dev/units/group/> a skos:ConceptScheme .

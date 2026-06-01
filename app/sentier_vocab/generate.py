@@ -20,8 +20,14 @@ from sentier_vocab.schemas import validate_data_file
 
 def build_graph(concepts: list[dict], scheme_uri: str, sv: SchemaView, class_name: str) -> Graph:
     """Build an rdflib SKOS graph from a list of concept dicts using the schema engine."""
+    from rdflib import Namespace as RDFNamespace
+
     graph = Graph()
     graph.bind("skos", SKOS)
+    # Bind all schema-declared prefixes so rdflib never auto-assigns ns1/ns2,
+    # which would make serialization non-deterministic.
+    for prefix, uri in sv.schema.prefixes.items():
+        graph.bind(prefix, RDFNamespace(str(uri.prefix_reference)))
     graph.add((URIRef(scheme_uri), RDF.type, SKOS.ConceptScheme))
     for record in concepts:
         for triple in concept_to_triples(record, class_name, sv, scheme_uri):

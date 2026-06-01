@@ -1,4 +1,4 @@
-@prefix ns1: <https://vocab.sentier.dev/ontology/> .
+@prefix ont: <https://vocab.sentier.dev/ontology/> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
 <https://vocab.sentier.dev/flows/ENVO_00002006> a skos:Concept ;
@@ -6,7 +6,7 @@
     skos:exactMatch <http://purl.obolibrary.org/obo/ENVO_00002006> ;
     skos:inScheme <https://vocab.sentier.dev/flows/> ;
     skos:prefLabel "Freshwater"@en ;
-    ns1:compartment "water" .
+    ont:compartment "water" .
 
 <https://vocab.sentier.dev/flows/ENVO_00002010> a skos:Concept ;
     skos:broader <https://vocab.sentier.dev/flows/ENVO_00002006> ;
@@ -14,7 +14,7 @@
     skos:exactMatch <http://purl.obolibrary.org/obo/ENVO_00002010> ;
     skos:inScheme <https://vocab.sentier.dev/flows/> ;
     skos:prefLabel "Saline water"@en ;
-    ns1:compartment "water" .
+    ont:compartment "water" .
 
 <https://vocab.sentier.dev/flows/> a skos:ConceptScheme .
 

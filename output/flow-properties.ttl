@@ -1,20 +1,20 @@
-@prefix ns1: <https://vocab.sentier.dev/ontology/> .
-@prefix ns2: <http://qudt.org/schema/qudt/> .
+@prefix ont: <https://vocab.sentier.dev/ontology/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
 <https://vocab.sentier.dev/flow-properties/energy> a skos:Concept ;
-    ns2:hasUnit <http://qudt.org/vocab/unit/J> ;
+    qudt:hasUnit <http://qudt.org/vocab/unit/J> ;
     skos:definition "Energy content of a flow."@en ;
     skos:inScheme <https://vocab.sentier.dev/flow-properties/> ;
     skos:prefLabel "Energy"@en ;
-    ns1:dataType "physical" .
+    ont:dataType "physical" .
 
 <https://vocab.sentier.dev/flow-properties/mass> a skos:Concept ;
-    ns2:hasUnit <http://qudt.org/vocab/unit/KiloGM> ;
+    qudt:hasUnit <http://qudt.org/vocab/unit/KiloGM> ;
     skos:definition "Physical mass of a flow."@en ;
     skos:inScheme <https://vocab.sentier.dev/flow-properties/> ;
     skos:prefLabel "Mass"@en ;
-    ns1:dataType "physical" .
+    ont:dataType "physical" .
 
 <https://vocab.sentier.dev/flow-properties/> a skos:ConceptScheme .
 
